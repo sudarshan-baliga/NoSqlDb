@@ -48,7 +48,7 @@ def main():
             "Connected\nEnter CLOSE to terminalte the connection\nFormat for querying TYPE:<key>:value \nleave the field blank if not applicable, separate the values by comma in case of list\n".encode())
         request = connection.recv(4096).decode()
         command, key, value = parseRequest(request)
-
+        command = command.upper()
         if command in(
             'GET',
             'GETLIST'
