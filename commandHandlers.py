@@ -8,12 +8,12 @@ STORE_DIR = './store.pkl'
 if os.path.exists(STORE_DIR):
     with open(STORE_DIR, 'rb') as file:
         store = pickle.load(file)
-    print(store)
 else:
     print("store.pkl  file not found \ncreating store.pkl")
     file = open(STORE_DIR, 'w')
     file.close()
     store = {}
+
 
 def handlePut(key, value):
     """Inserting single value into key
@@ -21,34 +21,40 @@ def handlePut(key, value):
     store[key] = value
     with open(STORE_DIR, 'wb') as dbFile:
         pickle.dump(store, dbFile)
-    return json.dumps({"status": "success", "message":"inserted succesfully"})
+    return json.dumps({"status": "success", "message": "inserted succesfully"})
 
 
 def handleGet(key):
     """Returns JSON object containing status and value, if value exists
     or false to the client"""
     if key not in store:
-        return json.dumps({"status": "failure", "message":"key not found"})
+        return json.dumps({"status": "failure", "message": "key not found"})
     else:
-        return json.dumps({"status": "sucess", "message":"key found", key: store[key]})
+        return json.dumps({"status": "success", "message": "key found", key: store[key]})
 
 
 def handleDelete(key):
     """Returns JSON object containing status if value exists and 
     deleted or false along with the message"""
-    pass
+    val = store.pop(key, None)
+    if val != None:
+        with open(STORE_DIR, 'wb') as dbFile:
+            pickle.dump(store, dbFile)
+        return json.dumps({"status": "success", "message": "deletion succesful"})
+    else:
+        return json.dumps({"status": "failure", "message": "key not found"})
 
 
 def handleGetList(key):
     """ReturnsJSON object containing status and list of elements if key exists 
     along with the message"""
-    pass
+    return handleGet(key)
+
 
 def handlePutList(key, value):
     """ReturnsJSON object containing status if list is inserted succesfully to the 
     key and also returns the message"""
-    pass
-
+    return handlePut(key, value)
 
 def handleError(errCode):
     "Return json object containing status and error message"
@@ -56,4 +62,6 @@ def handleError(errCode):
         msg = "Command not found"
     elif errCode == 2:
         msg = "not enough args"
+    else:   
+        msg = "unknown error"
     return json.dumps({"status": "failure", "message": msg})
